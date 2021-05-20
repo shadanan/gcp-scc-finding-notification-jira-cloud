@@ -80,9 +80,10 @@ In this section, we'll provision a service account that will be used by our clou
 
 In this section, we will create a Firestore database instance that will maintain a mapping between the Security Command Center finding names and the Jira issue keys. This will enable our cloud function to create new issues, and automatically close existing issues when the findings are resolved.
 
-1. Create the Firestore database instance.
+1. Create an App Engine app and the Firestore database instance.
 
    ```console
+   $ gcloud app create --region=us-central
    $ gcloud firestore databases create --region=us-central
    ```
 
@@ -143,9 +144,9 @@ Jira deployments are highly configurable. The cloud function needs to know the t
    `https://<your-domain>.atlassian.net/jira/projects`
 
    ```console
-   $ export USER_ID=<your-user-id>
-   $ export DOMAIN=<your-domain>
-   $ export JIRA_PROJECT_KEY=<your-project-key>
+   $ export USER_ID=<your-user-id>               # e.g. shads@google.com
+   $ export DOMAIN=<your-domain>                 # e.g. shads
+   $ export JIRA_PROJECT_KEY=<your-project-key>  # e.g. SFN
    ```
 
 1. Deploy the `update-jira-findings` cloud function. If you have not enabled Cloud Build API, then this command may fail. Follow the link in the error message to enable it and then try again.
