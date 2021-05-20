@@ -52,15 +52,15 @@ Cloud Pub/Sub is a real-time messaging service that enables messages to be sent 
 1. Create the topic where all the findings will be published.
 
    ```console
-   $ gcloud pubsub topics create scc-findings-topic
-   $ export TOPIC=projects/$PROJECT_ID/topics/scc-findings-topic
+   $ export TOPIC=scc-findings-topic
+   $ gcloud pubsub topics create $TOPIC
    ```
 
 1. Configure SCC to publish notifications to our topic.
 
    ```console
    $ gcloud scc notifications create scc-findings-notify \
-       --organization $ORG_ID --pubsub-topic $TOPIC
+       --organization $ORG_ID --pubsub-topic projects/$PROJECT_ID/topics/$TOPIC
    ```
 
 ### Create a Service Account for our cloud function
@@ -122,11 +122,25 @@ In this section, we will create a Firestore database instance that will maintain
      --role='roles/secretmanager.secretAccessor'
    ```
 
-### Publish the cloud function
+### Configure and Publish the Cloud Function
 
-1. Set the Atlassian user ID (typically your email address), domain and project key. The domain and project key can be extracted from Jira's Kanban board URL. The URL will have the following form:
+Jira deployments are highly configurable. The cloud function needs to know the type of issue to publish, and which status columns to use for active and inactive findings.
 
-   `https://<your-domain>.atlassian.net/secure/RapidBoard.jspa?projectKey=<your-project-key>`
+1. Set the Jira issue type, the status column for new Jira tickets, and the status column for closed Jira tickets. For some board configurations, you should use "To Do" instead of "Backlog" for `STATUS_OPEN`.
+
+   ```console
+   $ export ISSUE_TYPE="Task"
+   $ export STATUS_OPEN="Backlog"
+   $ export STATUS_DONE="Done"
+   ```
+
+1. Set the Atlassian user ID (typically your email address), domain and project key. The domain can be extracted from Jira's URL. The URL will have the following form:
+
+   `https://<your-domain>.atlassian.net/`
+
+   You can find your project key at this URL:
+
+   `https://<your-domain>.atlassian.net/jira/projects`
 
    ```console
    $ export USER_ID=<your-user-id>
@@ -141,9 +155,9 @@ In this section, we will create a Firestore database instance that will maintain
        --entry-point=process_notification \
        --runtime=python39 \
        --service-account="$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
-       --set-env-vars="PROJECT_ID=$PROJECT_ID,USER_ID=$USER_ID,DOMAIN=$DOMAIN,JIRA_PROJECT_KEY=$JIRA_PROJECT_KEY" \
+       --set-env-vars="PROJECT_ID=$PROJECT_ID,USER_ID=$USER_ID,DOMAIN=$DOMAIN,JIRA_PROJECT_KEY=$JIRA_PROJECT_KEY",ISSUE_TYPE="$ISSUE_TYPE",STATUS_OPEN="$STATUS_OPEN",STATUS_DONE="$STATUS_DONE" \
        --source=cf \
-       --trigger-topic=scc-findings-topic
+       --trigger-topic=$TOPIC
    ```
 
 ### Test It Out

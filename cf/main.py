@@ -15,8 +15,8 @@ PREFIX = "https://console.cloud.google.com/security/command-center/findings"
 # corresponding to it is in the `STATUS_OPEN` column, then this script will move it to
 # the `STATUS_DONE` column. If the existing issue is in any other column, this script
 # will do nothing.
-STATUS_OPEN = "Backlog"
-STATUS_DONE = "Done"
+STATUS_OPEN = os.environ["STATUS_OPEN"]
+STATUS_DONE = os.environ["STATUS_DONE"]
 
 
 def get_atlassian_api_token():
@@ -136,7 +136,7 @@ def create_open_jira_issue(finding):
             "fields": {
                 "summary": f"{finding['severity']} severity {finding['category']} finding",
                 "project": {"key": project_key},
-                "issuetype": {"name": "Bug"},
+                "issuetype": {"name": os.environ["ISSUE_TYPE"]},
                 "description": {
                     "type": "doc",
                     "version": 1,
@@ -203,4 +203,8 @@ def decode_finding(data):
 
 def process_notification(event, context):
     """Process the finding notification."""
-    process_finding(decode_finding(event["data"]))
+    try:
+        process_finding(decode_finding(event["data"]))
+    except requests.exceptions.HTTPError as err:
+        print(err.response.text)
+        raise err
