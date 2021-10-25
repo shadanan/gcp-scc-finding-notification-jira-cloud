@@ -32,14 +32,14 @@ The rest of this tutorial will be performed in a terminal.
 
 1. Clone this repository locally and make it the current working folder.
 
-   ```console
+   ```shell
    git clone https://github.com/shadanan/gcp-scc-finding-notification-jira-cloud.git
    cd gcp-scc-finding-notification-jira-cloud
    ```
 
 1. In the shell that we prepared at the beginning, set the org and project ID. The selected project is where the cloud function will execute form.
 
-   ```console
+   ```shell
    export ORG_ID=<your org id>
    export PROJECT_ID=<your project id>
    gcloud config set project $PROJECT_ID
@@ -51,14 +51,14 @@ Cloud Pub/Sub is a real-time messaging service that enables messages to be sent 
 
 1. Create the topic where all the findings will be published.
 
-   ```console
+   ```shell
    export TOPIC=scc-findings-topic
    gcloud pubsub topics create $TOPIC
    ```
 
 1. Configure SCC to publish notifications to our topic.
 
-   ```console
+   ```shell
    gcloud scc notifications create scc-findings-notify \
      --organization $ORG_ID --pubsub-topic projects/$PROJECT_ID/topics/$TOPIC
    ```
@@ -69,7 +69,7 @@ In this section, we'll provision a service account that will be used by our clou
 
 1. Create the service account.
 
-   ```console
+   ```shell
    export SERVICE_ACCOUNT=jira-cloud-function-sa
    gcloud iam service-accounts create $SERVICE_ACCOUNT \
      --display-name "SCC Finding Notifier Jira cloud function" \
@@ -82,14 +82,14 @@ In this section, we will create a Firestore database instance that will maintain
 
 1. Create an App Engine app and the Firestore database instance.
 
-   ```console
+   ```shell
    gcloud app create --region=us-central
    gcloud firestore databases create --region=us-central
    ```
 
 1. Grant the service account access to the Firestore database.
 
-   ```console
+   ```shell
    gcloud projects add-iam-policy-binding $PROJECT_ID \
      --member="serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
      --role='roles/datastore.user'
@@ -99,25 +99,25 @@ In this section, we will create a Firestore database instance that will maintain
 
 1. Export the Atlassian API Token into an environment variable.
 
-   ```console
+   ```shell
    export ATLASSIAN_API_TOKEN=<your-app-secret>
    ```
 
 1. Create the token.
 
-   ```console
+   ```shell
    gcloud secrets create atlassian-api-token
    ```
 
 1. Set the value of the token.
 
-   ```console
+   ```shell
    echo -n $ATLASSIAN_API_TOKEN | gcloud secrets versions add atlassian-api-token --data-file=-
    ```
 
 1. Grant the service account access to the token.
 
-   ```console
+   ```shell
    gcloud secrets add-iam-policy-binding atlassian-api-token \
      --member="serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
      --role='roles/secretmanager.secretAccessor'
@@ -129,7 +129,7 @@ Jira deployments are highly configurable. The cloud function needs to know the t
 
 1. Set the Jira issue type, the status column for new Jira tickets, and the status column for closed Jira tickets. For some board configurations, you should use "To Do" instead of "Backlog" for `STATUS_OPEN`.
 
-   ```console
+   ```shell
    export ISSUE_TYPE="Task"
    export STATUS_OPEN="Backlog"
    export STATUS_DONE="Done"
@@ -143,7 +143,7 @@ Jira deployments are highly configurable. The cloud function needs to know the t
 
    `https://<your-domain>.atlassian.net/jira/projects`
 
-   ```console
+   ```shell
    export USER_ID=<your-user-id>               # e.g. shads@google.com
    export DOMAIN=<your-domain>                 # e.g. shads
    export JIRA_PROJECT_KEY=<your-project-key>  # e.g. SFN
@@ -151,7 +151,7 @@ Jira deployments are highly configurable. The cloud function needs to know the t
 
 1. Deploy the `update-jira-findings` cloud function. If you have not enabled Cloud Build API, then this command may fail. Follow the link in the error message to enable it and then try again.
 
-   ```console
+   ```shell
    gcloud functions deploy update-jira-findings \
      --entry-point=process_notification \
      --runtime=python39 \
