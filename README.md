@@ -26,7 +26,7 @@ In this section, we will generate an Atlassian API token that will authorize our
 
 ### Open a Terminal
 
-The rest of this tutorial will be performed in a terminal.
+The rest of this tutorial will be performed in both a terminal and console.
 
 1. Open a [Cloud Shell Console](https://ssh.cloud.google.com/cloudshell/editor), or a shell with the [gcloud CLI](https://cloud.google.com/sdk/gcloud) installed.
 
@@ -80,20 +80,14 @@ In this section, we'll provision a service account that will be used by our clou
 
 In this section, we will create a Firestore database instance that will maintain a mapping between the Security Command Center finding names and the Jira issue keys. This will enable our cloud function to create new issues, and automatically close existing issues when the findings are resolved.
 
-1. Create an App Engine app and the Firestore database instance.
+1. Create an App Engine app.
 
    ```shell
    gcloud app create --region=us-central
    gcloud firestore databases create --region=us-central
    ```
 
-1. Grant the service account access to the Firestore database.
 
-   ```shell
-   gcloud projects add-iam-policy-binding $PROJECT_ID \
-     --member="serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
-     --role='roles/datastore.user'
-   ```
 
 ### Save Atlassian API Token in Secrets Manager
 
