@@ -121,7 +121,7 @@ In this section, we will create a Firestore database instance that will maintain
      --role='roles/secretmanager.secretAccessor'
    ```
    **Incase you get Secret manager access denied despite correct roles for service account try this:**
-    - You can find the serviceAccount that looks like this ```shell<project-name>@appspot.gserviceaccount.com``` from the deployment information details of cloud function.
+    - You can find the serviceAccount that looks like this ```<project-name>@appspot.gserviceaccount.com``` from the deployment information details of cloud function.
     - In IAM Admin, Add Secret Manager Secret Accessor Role to this Service Account.
       ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/OVDEw.png)
 ### Configure and Publish the Cloud Function
