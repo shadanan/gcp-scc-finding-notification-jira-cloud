@@ -149,7 +149,7 @@ Jira deployments are highly configurable. The cloud function needs to know the t
 
 ### Test It Out
 
-1. In Security Command Center, ensure **_Show Inactive_** checkbox is otickedff so that the findings don't disappear after you deactivate one. Then, manually deactivate and reactivate some findings in order to trigger the cloud function.
+1. In Security Command Center, ensure **_Show Inactive_** checkbox is ticked so that the findings don't disappear after you deactivate one. Then, manually deactivate and reactivate some findings in order to trigger the cloud function.
 
  ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/SCC%20finding.png)
 
