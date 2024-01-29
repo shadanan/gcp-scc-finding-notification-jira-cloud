@@ -156,6 +156,7 @@ Jira deployments are highly configurable. The cloud function needs to know the t
  **Incase your Cloud function isn't getting triggered try this:**
  - Click on **_Export_** and select Cloud Pub/Sub
  - select your Pub/Sub topic
+ - Repeat step above
  ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/export%20to%20topic.png)
 
 1. Refresh the Kanban board!
