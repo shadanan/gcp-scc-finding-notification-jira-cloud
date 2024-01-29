@@ -151,7 +151,9 @@ Jira deployments are highly configurable. The cloud function needs to know the t
 
 1. In Security Command Center, ensure **_Show Only Active Findings_** is off so that the findings don't disappear after you deactivate one. Then, manually deactivate and reactivate some findings in order to trigger the cloud function.
 
- 
+ ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/SCC%20finding.png)
+
+ **Incase your Cloud function doesn't get triggered try this**
 
 1. Refresh the Kanban board!
 
