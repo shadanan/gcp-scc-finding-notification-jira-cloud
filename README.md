@@ -143,7 +143,7 @@ Jira deployments are highly configurable. The cloud function needs to know the t
     ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/env%20variables.png)
   
 
-1. Deploy the `update-jira-findings` cloud function. If you have not enabled Cloud Build API, then this command may fail. Follow the link in the error message to enable it and then try again.
+1. Deploy the `update-jira-findings` cloud function.Ensure Cloud Build API is enabled
 
    ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/deploy%20jira.png)
 
