@@ -26,7 +26,7 @@ In this section, we will generate an Atlassian API token that will authorize our
 
 ### Open a Terminal
 
-The rest of this tutorial will be performed in a terminal.
+The rest of this tutorial will be performed in both a terminal and console.
 
 1. Open a [Cloud Shell Console](https://ssh.cloud.google.com/cloudshell/editor), or a shell with the [gcloud CLI](https://cloud.google.com/sdk/gcloud) installed.
 
@@ -80,20 +80,18 @@ In this section, we'll provision a service account that will be used by our clou
 
 In this section, we will create a Firestore database instance that will maintain a mapping between the Security Command Center finding names and the Jira issue keys. This will enable our cloud function to create new issues, and automatically close existing issues when the findings are resolved.
 
-1. Create an App Engine app and the Firestore database instance.
+1. Create an App Engine app.
 
    ```shell
    gcloud app create --region=us-central
    gcloud firestore databases create --region=us-central
    ```
+2. Create a firestore db (native mode)
+   ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/Native%20mode.png)
+   ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/create%20firestore%20db.png)
+   
 
-1. Grant the service account access to the Firestore database.
 
-   ```shell
-   gcloud projects add-iam-policy-binding $PROJECT_ID \
-     --member="serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
-     --role='roles/datastore.user'
-   ```
 
 ### Save Atlassian API Token in Secrets Manager
 
@@ -122,50 +120,44 @@ In this section, we will create a Firestore database instance that will maintain
      --member="serviceAccount:$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
      --role='roles/secretmanager.secretAccessor'
    ```
-
+   **Incase you get Secret manager access denied despite correct roles for service account try this:**
+    - You can find the serviceAccount that looks like this ```<project-name>@appspot.gserviceaccount.com``` from the deployment information details of cloud function.
+    - In IAM Admin, Add Secret Manager Secret Accessor Role to this Service Account.
+      ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/OVDEw.png)
 ### Configure and Publish the Cloud Function
 
 Jira deployments are highly configurable. The cloud function needs to know the type of issue to publish, and which status columns to use for active and inactive findings.
 
 1. Set the Jira issue type, the status column for new Jira tickets, and the status column for closed Jira tickets. For some board configurations, you should use "To Do" instead of "Backlog" for `STATUS_OPEN`.
 
-   ```shell
-   export ISSUE_TYPE="Task"
-   export STATUS_OPEN="Backlog"
-   export STATUS_DONE="Done"
-   ```
 
-1. Set the Atlassian user ID (typically your email address), domain and project key. The domain can be extracted from Jira's URL. The URL will have the following form:
+2. Set the Atlassian user ID (typically your email address), domain and project key. The domain can be extracted from Jira's URL. The URL will have the following form:
 
    `https://<your-domain>.atlassian.net/`
 
    You can find your project key at this URL:
 
    `https://<your-domain>.atlassian.net/jira/projects`
+    ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/create%20cf.png)
 
-   ```shell
-   export USER_ID=<your-user-id>               # e.g. shads@google.com
-   export DOMAIN=<your-domain>                 # e.g. shads
-   export JIRA_PROJECT_KEY=<your-project-key>  # e.g. SFN
-   ```
+    ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/env%20variables.png)
+  
 
-1. Deploy the `update-jira-findings` cloud function. If you have not enabled Cloud Build API, then this command may fail. Follow the link in the error message to enable it and then try again.
+1. Deploy the `update-jira-findings` cloud function.Ensure Cloud Build API is enabled
 
-   ```shell
-   gcloud functions deploy update-jira-findings \
-     --entry-point=process_notification \
-     --runtime=python39 \
-     --service-account="$SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
-     --set-env-vars="PROJECT_ID=$PROJECT_ID,USER_ID=$USER_ID,DOMAIN=$DOMAIN,JIRA_PROJECT_KEY=$JIRA_PROJECT_KEY",ISSUE_TYPE="$ISSUE_TYPE",STATUS_OPEN="$STATUS_OPEN",STATUS_DONE="$STATUS_DONE" \
-     --source=cf \
-     --trigger-topic=$TOPIC
-   ```
+   ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/deploy%20jira.png)
 
 ### Test It Out
 
-1. In Security Command Center, ensure **_Show Only Active Findings_** is off so that the findings don't disappear after you deactivate one. Then, manually deactivate and reactivate some findings in order to trigger the cloud function.
+1. In Security Command Center, ensure **_Show Inactive_** checkbox is ticked so that the findings don't disappear after you deactivate one. Then, manually deactivate and reactivate some findings in order to trigger the cloud function.
 
-   ![](toggle-finding-inactive-active.png)
+ ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/SCC%20finding.png)
+
+ **Incase your Cloud function isn't getting triggered try this:**
+ - Click on **_Export_** and select Cloud Pub/Sub
+ - select your Pub/Sub topic
+ - Repeat step above
+ ![](https://github.com/ajayi-george/gcp-scc-finding-notification-jira-cloud/blob/main/export%20to%20topic.png)
 
 1. Refresh the Kanban board!
 
